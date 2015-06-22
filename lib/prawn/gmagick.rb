@@ -75,13 +75,20 @@ class Gmagick < Prawn::Images::Image
         break
       else
         # unknown (or un-important) section, skip over it
-        data.seek(data.pos + chunk_size)
+        data.seek(data.pos.to_i + chunk_size.to_i)
       end
 
       data.read(4)  # Skip the CRC
     end
 
     @img_data = Zlib::Inflate.inflate(@img_data)
+  rescue StandardError => e
+    puts "Nothing"
+    @color_type = 2
+    self.gimage = GMagick::Image.new data
+    self.gbits = gimage.depth
+    self.gwidth = gimage.width
+    self.gheight = gimage.height
   end
 
   # number of color components to each pixel
@@ -114,7 +121,6 @@ class Gmagick < Prawn::Images::Image
     # some PNG types store the colour and alpha channel data together,
     # which the PDF spec doesn't like, so split it out.
     split_alpha_channel!
-
     case colors
     when 1
       color = :DeviceGray
