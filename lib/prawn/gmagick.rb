@@ -19,6 +19,7 @@ class Gmagick < Prawn::Images::Image
   # <tt>data</tt>:: A binary string of PNG data
   #
   def initialize(data)
+    image_blob = data
     data = StringIO.new(data.dup)
 
     data.read(8)  # Skip the default header
@@ -56,7 +57,7 @@ class Gmagick < Prawn::Images::Image
           # fail Errors::UnsupportedImageType,
           #      "Pallete-based transparency in PNG is not currently supported.\n" \
           #      "See https://github.com/prawnpdf/prawn/issues/783"
-          self.gimage = GMagick::Image.new data
+          self.gimage = GMagick::Image.new image_blob
           self.gbits = gimage.depth
           self.gwidth = gimage.width
           self.gheight = gimage.height
@@ -83,9 +84,8 @@ class Gmagick < Prawn::Images::Image
 
     @img_data = Zlib::Inflate.inflate(@img_data)
   rescue StandardError => e
-    puts "Nothing"
-    @color_type = 2
-    self.gimage = GMagick::Image.new data
+    @color_type = 5
+    self.gimage = GMagick::Image.new image_blob
     self.gbits = gimage.depth
     self.gwidth = gimage.width
     self.gheight = gimage.height
@@ -99,6 +99,8 @@ class Gmagick < Prawn::Images::Image
       return 1
     when 2, 6
       return 3
+    else
+      return 4
     end
   end
 
